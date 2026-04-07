@@ -30,6 +30,12 @@ async function main() {
     }
 }
 /// MARK: - Rendering
+function renderGuesses( g, a, e = false ) {
+    for( let i=0;i<g.length;i++ ) {
+        renderGuess(g[i], a, e);
+    }
+}
+
 function renderGuess( g, a, emojified = false ) {
     let r = '';
     if ( emojified ) {
