@@ -7,6 +7,10 @@ Run the program from your terminal:
 ```bash
 node Wrdl.js
 ```
+or
+```bash
+wordle
+```
 
 You have five attempts to guess a secret five-letter word.
 
