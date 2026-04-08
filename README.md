@@ -12,4 +12,4 @@ After each guess:
 Type your five-letter guess and press Enter. The game ends when you guess the word or exhaust all six attempts.
 
 ## License
-This project is licensed under the MIT License with a No-AI Addendum. See [LICENSE](LICENSE) and [ADDENDUM.md](ADDENDUM.md) for details.
+This project is distributed under a custom license based on the MIT License, with additional restrictions. See [LICENSE](LICENSE) and [ADDENDUM.md](ADDENDUM.md) for the full terms.
