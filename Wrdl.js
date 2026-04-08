@@ -81,3 +81,13 @@ function isPresentInArray( e, l ) {
 function isPresentInWordList( w ) {
     return isPresentInArray(w, guessWords) || isPresentInArray(w, dailyWords);
 }
+/// MARK: - lookupDaily
+function lookupDailyIndex() {
+    return getDaysSince(new Date("".concat("2023-06-12", "T00:00:00")));
+}
+
+function lookupDailyWord() {
+    return dailyWords[lookupDailyIndex()];
+}
+
+/// TODO: Implement getDaysSince and hardInclude inquirer, package.json, chalk
