@@ -1,17 +1,17 @@
 # Wrdli
-A CLI-based Wordle-style game with a daily word selected from a built-in list.
+A CLI-based set of games with daily challenges synced from the original web games.
 
 ## How to Play
 Run the program from your terminal:
 
 ```bash
-node Wrdl.js
+node wrdli/wrdli.js
 ```
 or
 ```bash
-wordle
+node cli-connections/cli-connections.js
 ```
-
+Wrdli:
 You have five attempts to guess a secret five-letter word.
 
 After each guess:
@@ -28,3 +28,5 @@ Type your five-letter guess and press Enter. The game ends when you guess the wo
 
 ## License
 This project is distributed under a custom license based on the MIT License, with additional restrictions. See [LICENSE](LICENSE) for the full terms.
+
+

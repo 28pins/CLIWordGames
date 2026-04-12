@@ -2,12 +2,12 @@
   "name": "wrdli",
   "version": "1.0.0",
   "description": "A colorful Wordle-style CLI game",
-  "main": "wrdl.js",
+  "main": "wrdli.js",
   "bin": {
-    "wordle": "./wrdl.js"
+    "wrdli": "./wrdli.js"
   },
   "scripts": {
-    "start": "node wrdl.js"
+    "start": "node wrdli.js"
   },
   "keywords": [
     "cli",
