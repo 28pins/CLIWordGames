@@ -16,7 +16,7 @@ function formatDate(date) {
 /// MARK: - Puzzle Fetching
 async function getConnectionsPuzzle() {
     return new Promise((resolve, reject) => {
-        const apiUrl = `https://www.nytimes.com/svc/connections/v2/${formatDate(new Date())}.json`;
+        const apiUrl = `https://www.nytimes.com/svc/connections/v2/${formatDate(date)}.json`;
 
         https.get(apiUrl, { timeout: 10000 }, (res) => {
                 let data = '';
@@ -65,7 +65,7 @@ function renderPuzzle(puzzle, pos, completed) {
     
     const cellWidth = maxLength + 2;
     //completed
-    let output = [[], [], [], []];
+    let output = [[], [], [], [], [], [], [], []];
     let rendered = [false, false, false, false];
     for (let i=0;i<16;i++) {
         for (const group of puzzle.categories) {
@@ -92,7 +92,7 @@ function renderPuzzle(puzzle, pos, completed) {
     }
 
     //main
-    output = [[], [], [], [], [], [], [], []];
+    output = [[], [], [], []];
     for (let i=0;i<16;i++) {
         for (const group of puzzle.categories) {
             const card = group.cards.find(c => c.position === i);
@@ -162,7 +162,7 @@ function renderCell(content, completedIndex, isCurrent, selected, width, bold = 
 function countCompletedLines() {
     let count = 0;
     for (const c of completed) {
-        if (c === 1) {
+        if (c !== 0) {
             count++;
         }
     }
@@ -180,8 +180,36 @@ function getCategoryIndexByCardPosition(puzzle, position) {
     return -1;
 }
 let failureCount = 0;
+let date = new Date();
 /// MARK: - Main Game Loop
 async function main() {
+    const args = process.argv.slice(2);
+    if ( args.length > 0 ) {
+        for ( let i = 0; i < args.length; i++ ) {
+            const arg = args[i].toLowerCase();
+            if ( arg === 'help' || arg === '--help' || arg === '-h' ) {
+                console.log(chalk.blue('mouse a'));
+                console.log(chalk.blue('Use arrow keys or IJKL to navigate the grid'));
+                console.log(chalk.blue('Press Space, K, or Enter to select/deselect cards and confirm category completion'));
+                console.log(chalk.blue('Press X or navigate to the button to clear selected cards'));
+                console.log(chalk.blue('Press Q or Ctrl+C or navigate to the button to exit the game'));
+                console.log(chalk.blue('Press H or navigate to the button to see this message again'));
+                console.log(chalk.blue('Selected cards must all be in the same category to complete it'));
+                console.log(chalk.blue('You can only select up to 4 cards at a time'));
+                console.log(chalk.blue('After completing a category, the remaining cards will be condensed to fill the space'));
+                console.log(chalk.blue('Once 3 categories are completed, the remaining category will be automatically completed'));
+                console.log(chalk.blue('Use the date as an argument in YYYY-MM-DD format to play a specific puzzle'));
+                return;
+            } else {
+                if(Date.parse(arg)) {
+                    date = new Date(arg);
+                } else {
+                    console.log(chalk.red('Invalid date format. Please use YYYY-MM-DD.'));
+                    return;
+                }
+            }
+        }
+    }
     let puzzle;
     try {
         puzzle = await getConnectionsPuzzle();
@@ -249,6 +277,9 @@ async function main() {
                 console.log(chalk.blue('Press H or navigate to the button to see this message again'));
                 console.log(chalk.blue('Selected cards must all be in the same category to complete it'));
                 console.log(chalk.blue('You can only select up to 4 cards at a time'));
+                console.log(chalk.blue('After completing a category, the remaining cards will be condensed to fill the space'));
+                console.log(chalk.blue('Once 3 categories are completed, the remaining category will be automatically completed'));
+                console.log(chalk.blue('Use the date as an argument in YYYY-MM-DD format to play a specific puzzle'));
             } else if (pos[1] === 3) {
                 // Exit
                 //verify that user wants to exit
@@ -290,38 +321,54 @@ console.clear();
 main();
 let guesses = '';
 function confirmCategoryCompletion(puzzle) {
-    let allInSameCategory = true;
+    if ( guesses.split('\n').length >= 4) {
+        console.log(chalk.red('Game over!'));
+        console.log(chalk.bgGreen.white.bold('Thanks for playing!'));
+        //Generate emoji to share
+        console.log(`Connections\nPuzzle #${puzzle.id}`);
+        console.log(guesses);
+        setTimeout(() => {
+            process.exit();
+        }, 1000);
+    }
+    let allInSameCategory = 4;
     let currentCategoryIndex = getCategoryIndexByCardPosition(puzzle, selectedArr[0]);
     if (selectedArr.length === 4 && currentCategoryIndex !== -1) {
         for (let i = 0; i < 4; i++) {
             if (!puzzle.categories[currentCategoryIndex].cards.some(c => c.position === selectedArr[i])) {
-                allInSameCategory = false;
-                guesses += returnEmojiForCardPosition(selectedArr[i], puzzle);
+                allInSameCategory--;
             }
+            guesses += returnEmojiForCardPosition(selectedArr[i], puzzle);
         }
         guesses += '\n';
     } else {
-        allInSameCategory = false;
+        allInSameCategory = 0;
     }
-    if (allInSameCategory) {
+    if (allInSameCategory === 4) {
         completed[currentCategoryIndex] = Math.max(...completed) + 1;
         selectedArr = [];
         console.clear();
         renderPuzzle(puzzle, pos, completed);
         setTimeout(() => {
             if (countCompletedLines() === 4) {
+                renderPuzzle(puzzle, pos, completed);
                 console.log(chalk.bgGreen.white.bold('Congratulations! You completed the puzzle!'));
                 console.log(chalk.bgGreen.white.bold('Thanks for playing!'));
                 //Generate emoji to share
                 console.log(`Connections\nPuzzle #${puzzle.id}`);
                 console.log(guesses);
-                process.exit();
+                setTimeout(() => {
+                    process.exit();
+                }, 1000);
             } else {
                 console.clear();
                 console.log(chalk.green(`Category ${countCompletedLines()}/4 completed!`));
                 renderPuzzle(puzzle, pos, completed);
             }
-        }, 500);
+        }, 600);
+    } else if (allInSameCategory === 3) {
+        process.stdout.write('\x07\n');
+        console.log(chalk.yellow('One away!'));
     } else {
         process.stdout.write('\x07\n');
         console.log(chalk.red(selectedArr.length === 4 ? 'Selected cards are not in the same category!' : 'Please select 4 cards before pressing Enter!'));
@@ -340,6 +387,13 @@ function confirmCategoryCompletion(puzzle) {
                     puzzle.categories[puzzle.categories.indexOf(group)].cards.find(c => c.position === i).position = index;
                     index++;
                 }
+            }
+        }
+    }
+    if (countCompletedLines() === 3) {
+        for ( let i=0;i<4;i++) {
+            if (completed[i] === 0) {
+                completed[i] = 4;
             }
         }
     }

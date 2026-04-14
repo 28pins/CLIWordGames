@@ -13,6 +13,7 @@ const chalk = require('chalk');
 let guesses = []
 let mustRewriteGuesses = true;
 let date = new Date();
+let hardMode = false;
 /// MARK: - 
 async function main() {
     console.clear();
@@ -24,22 +25,29 @@ async function main() {
         }
     });
     if ( args.length > 0 ) {
-        const arg = args[0].toLowerCase();
-        if ( arg === 'help' || arg === '--help' || arg === '-h' ) {
-            console.log(chalk.blue('Type "exit" or "quit" to exit the game'));
-            console.log(chalk.blue('Type "help" to see this message again'));
-            console.log(chalk.blue('Type "guesses" to see your previous guesses'));
-            return;
-        } else {
-            if(Date.parse(arg)) {
-                date = new Date(arg);
-            } else {
-                console.log(chalk.red('Invalid date format. Please use YYYY-MM-DD.'));
+        for ( let i = 0; i < args.length; i++ ) {
+            const arg = args[i].toLowerCase();
+            if ( arg === 'help' || arg === '--help' || arg === '-h' ) {
+                console.log(chalk.blue('Type "exit" or "quit" to exit the game'));
+                console.log(chalk.blue('Type "help" to see this message again'));
+                console.log(chalk.blue('Type "guesses" to see your previous guesses'));
+                console.log(chalk.blue('Type "--hard" for hard mode'));
+                console.log(chalk.blue('Type a date as an argument to play a specific puzzle (format: YYYY-MM-DD)'));
                 return;
+            } else if ( arg === '--hard' ) {
+                hardMode = true;
+            } else {
+                if(Date.parse(arg)) {
+                    date = new Date(arg);
+                } else {
+                    console.log(chalk.red('Invalid date format. Please use YYYY-MM-DD.'));
+                    return;
+                }
             }
         }
     }
     const wordOfDay = await lookupDailyWord(date);
+    displayKeyboard(wordOfDay);
     while( guesses.length < 6 ) {
         const { word } = await inquirer.prompt([{ type:'input', name:'word', message:'Guess a word:' }]);
         const guess = word.toLowerCase();
@@ -56,24 +64,65 @@ async function main() {
         else if ( guess.length == 0 ) { console.log(chalk.red('Empty word')); mustRewriteGuesses = true; }
         else if ( !isPresentInWordList(guess) ) { console.log(chalk.red('Not in list')); mustRewriteGuesses = true; }
         else if ( isPresentInArray(guess, guesses) ) { console.log(chalk.red('No duplicates')); mustRewriteGuesses = true; }
-        else if ( guess === 'aargh' ) { console.log(chalk.red(wordOfDay)); console.log(dailyWords.indexOf("inlet")); mustRewriteGuesses = true; }
+        else if ( hardMode && !isHardModeValid(guess, guesses, wordOfDay) ) { console.log(chalk.red('Hard Mode: Use revealed letters!')); mustRewriteGuesses = true; }
+        else if ( guess === 'aargh' ) { console.log(chalk.red(wordOfDay)); guesses.push("aargh"); guesses.push(wordOfDay); mustRewriteGuesses = true; }
         else { /// MARK: - Highlighting logic
             guesses.push(guess);
             if ( mustRewriteGuesses ) {
                 console.clear();
+                displayKeyboard(wordOfDay);
                 renderGuesses(guesses, wordOfDay);
             } else {
                 renderGuess(guesses.length - 1, wordOfDay);
             }
             if ( guess === wordOfDay ) {
                 console.log("Great game!")
-                console.log(`Wordle ${ lookupDailyIndex(date) } ${ guesses.length }/6\n`)
+                console.log(`Wordle ${ lookupDailyIndex(date) } ${ guesses.length }/6${ hardMode ? '*' : '' }\n`)
                 renderGuesses(guesses, wordOfDay, true)
                 console.log(chalk.bgHex('#669966')('                     \n Thanks for playing! \n                     '));
                 return;
             }
         }
     }
+}
+/// MARK: - Display Keyboard
+function displayKeyboard( answerWord ) {
+    //Render Qwerty keyboard
+    if ( hardMode ) {
+        console.log(chalk.yellow('HARD MODE') + chalk.blue(' -- Wrdli -- CLI Daily Word Game'));
+    } else {
+        console.log(chalk.blue('Wrdli -- CLI Daily Word Game'));
+    }
+    const keyboard =  ['           q w e r t y u i o p', '            a s d f g h j k l', '              z x c v b n m'];
+    for (const row of keyboard) {
+        for (const char of row) {
+            if (char === ' ') {
+                process.stdout.write(' ');
+            } else {
+                let charColor = chalk.white;
+                for (const guess of guesses) {
+                    if (charColor === chalk.green) {
+                        break;
+                    }
+                    if (isPresentInArray(char, guess)) {
+                        charColor = chalk.gray;
+                    }
+                    if (isPresentInArray(char, guess) && isPresentInArray(char, answerWord)) {
+                        charColor = chalk.yellow;
+                        for (let i = 0; i < guess.length; i++) {
+                            if (guess[i] === char && answerWord[i] === char) {
+                                charColor = chalk.green;
+                                break;
+                            }
+                        }
+                    }
+                }
+                process.stdout.write(charColor(char));
+            }
+        }
+        console.log('\n');
+    }
+    console.log('-'.repeat(40));
 }
 /// MARK: - Rendering
 function renderGuesses( g, a, e = false ) {
@@ -123,7 +172,7 @@ function renderChar( w, i, a ) {
         if ( i >= a.length ) {
             return chalk.white(w[i]);
         } else if ( w[i] == a[i] ) {
-            return chalk.green(w[i]);
+            return chalk.black.bgGreen(w[i]);
         } else if ( isPresentInArray(w[i], a) ) {
             const aIndexes = getIndexesOfCharInWord(w[i], a);
             if ( countCharInArray(a, w[i]) >= countCharInArray(w, w[i]) ) { // If the answer has at least as many of the char as the guess, then we can safely highlight all of them
@@ -155,7 +204,7 @@ function renderChar( w, i, a ) {
         if ( i >= a.length ) {
             return chalk.white(w[i]);
         } else if ( w[i] == a[i] ) {
-            return chalk.green(w[i]);
+            return chalk.black.bgGreen(w[i]);
         } else if ( isPresentInArray(w[i], a) ) {
             return chalk.yellow(w[i]);
         } else {
@@ -218,6 +267,33 @@ function isPresentInArray( e, l ) {
 }
 function isPresentInWordList( w ) {
     return isPresentInArray(w, guessWords) || isPresentInArray(w, dailyWords);
+}
+/// MARK: - Hard Mode Validation
+function isHardModeValid( guess, previousGuesses, answerWord ) {
+    // Check all green letters (correct position) are used
+    for ( let i = 0; i < previousGuesses.length; i++ ) {
+        for ( let j = 0; j < 5; j++ ) {
+            if ( previousGuesses[i][j] === answerWord[j] && previousGuesses[i][j] !== guess[j] ) {
+                return false; // Green letter not used in correct position
+            }
+        }
+    }
+    
+    // Check all yellow letters (wrong position) are used
+    for ( let i = 0; i < previousGuesses.length; i++ ) {
+        for ( let j = 0; j < 5; j++ ) {
+            const char = previousGuesses[i][j];
+            // If this character was in the word but wrong position
+            if ( char !== answerWord[j] && isPresentInArray(char, answerWord) ) {
+                // Check if it's used in this guess
+                if ( !isPresentInArray(char, guess) ) {
+                    return false; // Yellow letter not used
+                }
+            }
+        }
+    }
+    
+    return true;
 }
 /// MARK: - lookupDaily
 function lookupDailyIndex(d = Date()) {
