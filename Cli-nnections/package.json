@@ -1,0 +1,24 @@
+{
+  "name": "cli-nnections",
+  "version": "1.0.0",
+  "description": "A colorful Connections-style CLI game",
+  "main": "cli-nnections.js",
+  "bin": {
+    "cli-nnections": "./Cli-nnections.js"
+  },
+  "scripts": {
+    "start": "node cli-nnections.js"
+  },
+  "keywords": [
+    "cli",
+    "connections",
+    "word-game",
+    "terminal"
+  ],
+  "author": "Your Name",
+  "license": "Custom No AI MIT Derivative",
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "inquirer": "^8.2.7"
+  }
+}

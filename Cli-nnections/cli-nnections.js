@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /// MARK: - Imports
 const chalk = require('chalk');
 const e = require('express');
@@ -188,7 +189,6 @@ async function main() {
         for ( let i = 0; i < args.length; i++ ) {
             const arg = args[i].toLowerCase();
             if ( arg === 'help' || arg === '--help' || arg === '-h' ) {
-                console.log(chalk.blue('mouse a'));
                 console.log(chalk.blue('Use arrow keys or IJKL to navigate the grid'));
                 console.log(chalk.blue('Press Space, K, or Enter to select/deselect cards and confirm category completion'));
                 console.log(chalk.blue('Press X or navigate to the button to clear selected cards'));
