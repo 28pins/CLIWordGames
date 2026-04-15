@@ -77,8 +77,9 @@ async function main() {
             }
             if ( guess === wordOfDay ) {
                 console.log("Great game!")
-                console.log(`Wordle ${ lookupDailyIndex(date) } ${ guesses.length }/6${ hardMode ? '*' : '' }\n`)
+                console.log(`OpenWord ${ lookupDailyIndex(date) } ${ guesses.length }/6${ hardMode ? '*' : '' }\n`)
                 renderGuesses(guesses, wordOfDay, true)
+                console.log('Want to play?  Try online at 28pins.github.io');
                 console.log(chalk.bgHex('#669966')('                     \n Thanks for playing! \n                     '));
                 return;
             }
