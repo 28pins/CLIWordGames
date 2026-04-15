@@ -1,10 +1,11 @@
 const consolePort = {
     log : function(...arg) {
         for ( let i = 0; i < arg.length; i++ ) {
-            arg[i] = arg[i].replace('/n', '<br>');
+            arg[i] = arg[i].replace(/\n/g, '<br>');
             arg[i] = arg[i].replace(' ', '&nbsp;');
+            arg[i] = arg[i].replace('span&nbsp;', 'span ');
         }
-        document.getElementById('game').innerHTML += arg.join(' ') + '\n';
+        document.getElementById('game').innerHTML += arg.join('');
     },
     clear : function() {
         document.getElementById('game').innerHTML = '';
@@ -13,6 +14,9 @@ const consolePort = {
 const chalkPort = {
     blue : function(text) {
         return `<span style="color: #0074D9">${text}</span>`;
+    },
+    red : function(text) {
+        return `<span style="color: #FF4136">${text}</span>`;
     },
     yellow : function(text) {
         return `<span style="color: #FFDC00">${text}</span>`;
@@ -42,9 +46,9 @@ const chalkPort = {
 function sanitizeInput(str) {
     if (!str) return '';
     // keep only letters and spaces, collapse whitespace, trim
-    const cleaned = String(str).replace(/[^a-zA-Z\s]/g, '');
-    return cleaned.replace(/\s+/g, ' ').trim();
-}
+    //allow letters, numbers, spaces, dashes, slashes; remove anything else for safety
+    const cleaned = str.replace('<', '&lt;').replace('>', '&gt;');
+    return cleaned.replace(/\s+/g, ' ').trim();}
 window.addEventListener('keydown', function(event) {
     if ( inquirerPortIsPrompting ) {
         const key = event.key;
@@ -88,7 +92,7 @@ const inquirerPort = {
     promptForWord : function(message) {
         inquirerPortIsPrompting = true;
         const game = document.getElementById('game');
-        game.innerHTML += message + ' ';
+        game.innerHTML += '<br>' + message + ' ';
         const input = document.createElement('span');
         input.className = 'inquirer-input';
         game.appendChild(input);
@@ -99,9 +103,8 @@ const inquirerPort = {
                 inquirerPortIsPrompting = false;
                 // capture and sanitize, then remove the input element
                 const raw = input.textContent || '';
-                const value = sanitizeInput(raw);
                 if (input.parentNode) input.parentNode.removeChild(input);
-                resolve(value);
+                resolve(raw);
             };
             window.addEventListener('inquirerSubmit', onSubmit);
         });

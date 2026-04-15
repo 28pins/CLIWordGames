@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wrdli - OpenWord</title>
+    <title>OpenWord</title>
     <style>
         :root{
             --page-bg: #f6f7f7;
             --container-bg: #eaf5ef; /* very pale muted green */
             --panel-bg: rgba(20,30,24,0.06);
-            --card-bg: #e7efea;
+            --card-bg: #343d38;
             --accent: #397a63; /* muted teal */
             --link: #2d6b5a;
         }
@@ -62,14 +62,14 @@
         /* Main game box: 40 characters wide, 24 lines high */
         #game {
             font-family: 'Courier New', Courier, monospace;
-            width: 40ch;
+            width: 60ch;
             max-width: 100%;
             line-height: 1.25;
             height: calc(24 * 1.25em);
             margin: 16px auto;
             padding: 12px;
             background: var(--card-bg);
-            color: #21332a;
+            color: #ffffff;
             border-radius: 12pt;
             box-shadow: 0 1px 4px rgba(0,0,0,0.06);
             overflow: auto;
@@ -81,16 +81,16 @@
     <br>
     <div class="container">
         <header>
-            <h1 class="heading">Wrdli - OpenWord</h1>
+            <h1 class="heading">OpenWord</h1>
             <h5 class="heading">No ads.  No upsell.  Open source and in sync.</h5>
-            <h3 class="heading"><a href="wrdli.html">Wrdli</a> | <a href="cli-necctions.html">Cli-necctions</a></h3>
         </header>
         <div id="game">
             Error loading game.  Please try again later.
         </div>
         <footer>
             <p>Download in NodeJS for CLI or fork on <a href="https://github.com/28pins/cliwordgames">on Github</a></p>
-            <p>OpenWord is licensed under the <a href="https://github.com/28pins/noailicense">NoAILicense.</a>.</p>
+            <p>OpenWord is licensed under the <a href="https://github.com/28pins/noailicense">NoAILicense</a>.</p>
+            <p>By <a href="https://github.com/28pins">28pins</a></p>
         </footer>
         <script src="nodePorts.js"></script>
         <script src="wrdli.js"></script>
