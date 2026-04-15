@@ -1,8 +1,8 @@
 const consolePort = {
     log : function(...arg) {
         for ( let i = 0; i < arg.length; i++ ) {
-            arg[i].replace(/\n/g, '<br>');
-            arg[i].replace(' ', '&nbsp;');
+            arg[i] = arg[i].replace('/n', '<br>');
+            arg[i] = arg[i].replace(' ', '&nbsp;');
         }
         document.getElementById('game').innerHTML += arg.join(' ') + '\n';
     },
@@ -19,6 +19,9 @@ const chalkPort = {
     },
     green : function(text) {
         return `<span style="color: #2ECC40">${text}</span>`;
+    },
+    white : function(text) {
+        return `<span style="color: #FFFFFF">${text}</span>`;
     },
     bgGreen : function(text) {
         return `<span style="background-color: #2ECC40; color: #000000;">${text}</span>`;
