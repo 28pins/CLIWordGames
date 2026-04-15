@@ -4,7 +4,7 @@
   "description": "A colorful Wordle-style CLI game",
   "main": "wrdli.js",
   "bin": {
-    "wrdli": "./wrdli.js"
+    "wrdli": "./Wrdli.js"
   },
   "scripts": {
     "start": "node wrdli.js"
