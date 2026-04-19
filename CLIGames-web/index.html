@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CLI Word Games</title>
+    <link rel="stylesheet" href="src/css/indexThemes.css">
+    <link rel="stylesheet" href="src/css/styles.css">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1 class="heading">CLI Word Games</h1>
+            <h5 class="heading">No ads. No upsell. Open source and in sync.</h5>
+            <!--Link to other games-->
+            <nav class="heading" aria-label="Main navigation">
+                <h2>
+                <a href="words.html">Words</a> |
+                <a href="categories.html">Categories</a> |
+                <a href="index.html">Home</a>
+            </h2>
+            </nav>
+        </header>
+        <main id="game" role="main">
+            <p>This site is a port of my CLI based word games. Click a link above to play!</p>
+            <p>Most of the NodeJS code (available on <a href="https://github.com/28pins/cliwordgames">GitHub</a>) works
+                out of the box.
+                I wrote porting functions for node modules like chalk, console, and inquirer, but they are not
+                all-inclusive and only support
+                the methods used in the original games. The live web requests made in the CLI versions are blocked by
+                CORS in the browser, so these
+                versions use a static array that is refreshed by a node script.</p>
+        </main>
+        <footer>
+            <p>Download the CLI for Node.js or fork on <a href="https://github.com/28pins/cliwordgames">GitHub</a></p>
+            <p>CLI Word Games is licensed under the <a href="https://github.com/28pins/noailicense">NoAILicense</a>.</p>
+            <p>By <a href="https://github.com/28pins">28pins</a></p>
+        </footer>
+    </div>
+</body>
+
+</html>

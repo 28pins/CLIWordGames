@@ -1,0 +1,10 @@
+:root {
+    --page-bg: #f6f7f7;
+    --container-bg: #eaf5ef;
+    /* very pale muted green */
+    --panel-bg: rgba(20, 30, 24, 0.06);
+    --card-bg: #343d38;
+    --accent: #397a63;
+    /* muted teal */
+    --link: #2d6b5a;
+}

@@ -4,7 +4,7 @@
   "description": "A colorful Connections-style CLI game",
   "main": "cli-nnections.js",
   "bin": {
-    "cli-nnections": "./Cli-nnections.js"
+    "cli-nnections": "./cli-nnections.js"
   },
   "scripts": {
     "start": "node cli-nnections.js"
