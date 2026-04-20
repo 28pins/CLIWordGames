@@ -8,6 +8,10 @@ process.on('SIGINT', () => {
 /// MARK: - Variable Defintions
 //Import word lists
 const { guessWords, dailyWords } = require('./wrdli_words.js');
+if ( !guessWords || !dailyWords ) {
+    console.error('Error: word lists not found. Please run "node scripts/populate_dailyWords.js" to fetch the word lists from the NYT API.');
+    process.exit(1);
+}
 const inquirer = require('inquirer');
 const chalk = require('chalk');
 let guesses = []

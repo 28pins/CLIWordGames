@@ -77,6 +77,9 @@ Use the keyboard to navigate the grid, select four cards, and submit a category.
 - **Footer buttons** — on-screen Enter / Clear / Help / Exit buttons navigable with the keyboard.
 
 ---
+## Web Version
+A web-based version of both games is available at [28pins.github.io](https://28pins.github.io), built with the same data and logic as the CLI versions. The web version uses code in the 'CLIGames-web' folder.
+---
 
 ## Scripts (data utilities)
 
@@ -85,17 +88,10 @@ Use the keyboard to navigate the grid, select four cards, and submit a category.
 Requires **Node 18+** (uses global `fetch`).
 
 ### `scripts/populate_dailyWords.js`
-Fetches every daily Wordle solution from the NYT Wordle API starting from Wordle's launch date (2021-06-19) up to a given end date, and writes the full list to `OpenWord-web/generated_dailyWords.js`.
+Fetches every daily Wordle solution from the NYT Wordle API starting from Wordle's launch date (2021-06-19) up to a given end date, and writes the full list to `OpenWord-web/generated_dailyWords.js`.  Also updates connections with the same end date to ensure both games have the same range of puzzles.
 
 ```bash
 node scripts/populate_dailyWords.js 2026-04-14
-```
-
-### `scripts/populate_dailyPuzzles.js`
-Does the same for the NYT Connections API, writing all fetched puzzle JSON objects to `OpenWord-web/generated_dailyWords.js`.
-
-```bash
-node scripts/populate_dailyPuzzles.js 2026-04-14
 ```
 
 ---

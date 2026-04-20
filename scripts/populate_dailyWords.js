@@ -64,9 +64,11 @@ async function main() {
 
   // Write a JS file suitable for pasting into wrdli.js or importing.
   const fileContent = `const dailyWords = [${results.map(w => `  \"${w}\"`).join(', ')}];\n`;
-  fs.writeFileSync(OUT_FILE, fileContent, 'utf8');
+  fs.writeFileSync(OUT_FILE, fileContent , 'utf8');
   let existingContent = fs.readFileSync(OUT_FILE_2, 'utf8'); // preserve any existing content (like exports)
-  fs.writeFileSync(OUT_FILE_2, existingContent.split('const dailyWords =')[0] + fileContent, 'utf8');
+  fs.writeFileSync(OUT_FILE_2, existingContent.split('const dailyWords =')[0] + fileContent + `\n\nmodule.exports = {
+  guessWords, dailyWords
+}`, 'utf8');
   console.log(`\nWrote ${results.length} words to ${OUT_FILE}`);
 }
 
@@ -145,7 +147,9 @@ async function mainConnections() {
   try {
     fs.writeFileSync(COUT_FILE, fileContent, 'utf8');
     console.log(`\nWrote ${results.length} puzzles to ${COUT_FILE}`);
-    fs.writeFileSync(COUT_FILE_2, fileContent, 'utf8');
+    fs.writeFileSync(COUT_FILE_2, fileContent + `\n\nmodule.exports = {
+      dailyPuzzles
+  }`, 'utf8');
   } catch (err) {
     console.error(`Failed to write output files: ${err && err.message ? err.message : String(err)}`);
   }
