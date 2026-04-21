@@ -1,0 +1,25 @@
+{
+    "name": "populateDailyWords",
+    "version": "1.2.0",
+    "description": "A script to populate the dailyWords and dailyPuzzles files with the correct words and puzzles for the day",
+    "main": "populate_dailyWords.js",
+    "bin": {
+        "download-puzzles": "./populate_dailyWords.js"
+    },
+    "scripts": {
+        "start": "node populate_dailyWords.js"
+    },
+    "keywords": [
+        "cli",
+        "wordle",
+        "connections",
+        "daily-words",
+        "daily-puzzles"
+    ],
+    "author": "Your Name",
+    "license": "Custom No AI MIT Derivative",
+    "dependencies": {
+        "axios": "^0.27.2",
+        "fs": "0.0.1-security"
+    }
+}

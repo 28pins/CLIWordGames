@@ -1,6 +1,6 @@
 {
   "name": "wrdli",
-  "version": "1.0.0",
+  "version": "2.0.1",
   "description": "A colorful Wordle-style CLI game",
   "main": "wrdli.js",
   "bin": {

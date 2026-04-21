@@ -94,6 +94,15 @@ Fetches every daily Wordle solution from the NYT Wordle API starting from Wordle
 node scripts/populate_dailyWords.js 2026-04-14
 ```
 
+### `scripts/initCommands.sh`
+Runs `chmod +x` on all game scripts to make them directly executable from the terminal without `node` prefix. Only needs to be run once after cloning the repo.
+
+```bash
+
+chmod +x scripts/initCommands.sh
+./scripts/initCommands.sh
+```
+
 ---
 
 ## License
