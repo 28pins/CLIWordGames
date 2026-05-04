@@ -78,17 +78,17 @@ Use the keyboard to navigate the grid, select four cards, and submit a category.
 
 ---
 ## Web Version
-A web-based version of both games is available at [28pins.github.io](https://28pins.github.io), built with the same data and logic as the CLI versions. The web version uses code in the 'CLIGames-web' folder.
+A web-based version of both games is available at [28pins.github.io](https://28pins.github.io), built with the same data and logic as the CLI versions. The web version uses code in the 'CLIGames-web' directory.
 ---
 
 ## Scripts (data utilities)
 
-> **Note:** These scripts are developer utilities for pre-populating offline word/puzzle data for the `OpenWord-web` project. They are **not required** to play either game — both games fetch data live. Run them sparingly, as they make repeated API requests.
+> **Note:** These scripts are developer utilities for pre-populating offline word/puzzle data for the `OpenWord-web` project. They are **not required** to play either game — both games fetch data automatically.
 
 Requires **Node 18+** (uses global `fetch`).
 
 ### `scripts/populate_dailyWords.js`
-Fetches every daily Wordle solution from the NYT Wordle API starting from Wordle's launch date (2021-06-19) up to a given end date, and writes the full list to `OpenWord-web/generated_dailyWords.js`.  Also updates connections with the same end date to ensure both games have the same range of puzzles.
+Fetches every daily Wordle solution from the NYT Wordle API starting from Wordle's launch date (2021-06-19) up to a given end date, and writes the full list to `OpenWord-web/generated_dailyWords.json`.
 
 ```bash
 node scripts/populate_dailyWords.js 2026-04-14
@@ -97,8 +97,7 @@ node scripts/populate_dailyWords.js 2026-04-14
 ### `scripts/initCommands.sh`
 Runs `chmod +x` on all game scripts to make them directly executable from the terminal without `node` prefix. Only needs to be run once after cloning the repo.
 
-```bash
-
+```
 chmod +x scripts/initCommands.sh
 ./scripts/initCommands.sh
 ```
@@ -109,3 +108,5 @@ chmod +x scripts/initCommands.sh
 This project is distributed under a custom license based on the MIT License, with additional restrictions. See [LICENSE](LICENSE) for the full terms.
 
 
+## Disclaimer
+This project fetches live puzzle data from third-party APIs (including the NYT public endpoints). These sources may change or disappear at any time. As a result, daily puzzle syncing, historical archives, or future puzzles may break or stop working without warning. This project is independent, open-source, and does not guarantee uninterrupted access to any external puzzle services.
