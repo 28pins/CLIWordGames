@@ -1,0 +1,1 @@
+A collection of fun and challenging CLI-based word games, including Wordle-inspired guessing and category sorting, with daily, archived, and limited future puzzles, plus web support. Inspired by NYT and classic brain teasers!
