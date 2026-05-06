@@ -134,10 +134,7 @@ async function mainConnections() {
 
   // Write failures to a log for inspection (prevents terminal flooding)
   if (failed.length > 0) {
-    const failLog = path.join(__dirname, '..', 'logs');
-    try { fs.mkdirSync(failLog, { recursive: true }); } catch (e) { }
-    fs.writeFileSync(path.join(failLog, `connections_failed_${formatDateAsYMD(CSTART_DATE)}_to_${formatDateAsYMD(CEND_DATE)}.json`), JSON.stringify(failed, null, 2), 'utf8');
-    console.log(`Failures: ${failed.length} dates (written to logs).`);
+    console.log(`Failures: ${failed.length} dates`);
   } else {
     console.log('No failures.');
   }
