@@ -16,6 +16,10 @@ const process = {
 };
 
 const consolePort = {
+    error(...args) {
+        log(args)
+        alert(args)
+    }
     log(...args) {
         const game = document.getElementById('game');
         if (!game) return;
