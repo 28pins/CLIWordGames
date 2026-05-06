@@ -10,6 +10,11 @@ const escapeHTML = (s) => {
     return out
 }
 
+const process = {
+    exit: () => {},
+    stdout: { write: () => {} }
+};
+
 const consolePort = {
     log(...args) {
         const game = document.getElementById('game');
