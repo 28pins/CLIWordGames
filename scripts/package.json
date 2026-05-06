@@ -19,7 +19,6 @@
     "author": "Your Name",
     "license": "Custom No AI MIT Derivative",
     "dependencies": {
-        "axios": "^0.27.2",
         "fs": "0.0.1-security"
     }
 }
