@@ -62,7 +62,7 @@ async function main() {
     }
   }
 
-  // Write a JS file suitable for pasting into wrdli.js or importing.
+  // Writes a JS file suitable for pasting into wrdli.js or importing.
   const fileContent = `const dailyWords = [${results.map(w => `  \"${w}\"`).join(', ')}];\n`;
   fs.writeFileSync(OUT_FILE, fileContent , 'utf8');
   let existingContent = fs.readFileSync(OUT_FILE_2, 'utf8'); // preserve any existing content (like exports)
@@ -72,7 +72,7 @@ async function main() {
   console.log(`\nWrote ${results.length} words to ${OUT_FILE}`);
 }
 
-// main().catch(err => { console.error(err); process.exit(1); });
+main().catch(err => { console.error(err); process.exit(1); });
 
 ///CONNECTIONS
 
