@@ -14,6 +14,7 @@ function formatDate(date) {
 }
 
 /// MARK: - Puzzle Fetching
+let guesses = '';
 async function getConnectionsPuzzle(forDate) {
     return new Promise((resolve, reject) => {
         const apiUrl = `https://www.nytimes.com/svc/connections/v2/${formatDate(forDate)}.json`;
@@ -84,7 +85,7 @@ function renderPuzzle(puzzle, pos, completed) {
         for (const group of puzzle.categories) {
             const card = group.cards.find(c => c.position === i);
             if (card) {
-                const content = card ? card.content : '';
+                let content = card ? card.content : '';
                 if (card && content === '' && card.image_url) {//Means there is an image_url for today's puzzle: warn user and render alt text
                     if (isImagePuzzle) {
                         content = card.image_alt_text ? card.image_alt_text : '[Image]';
@@ -133,7 +134,7 @@ function renderPuzzle(puzzle, pos, completed) {
             }
         }
     }
-    finalO = '';
+    let finalO = '';
     for (const line of output) {
         console.log(line.join(''));
     }
@@ -338,7 +339,6 @@ async function main() {
 /// MARK: - Entry Point
 console.clear();
 main();
-let guesses = '';
 function confirmCategoryCompletion(puzzle) {
     if (guesses.split('\n').length >= 4) {
         console.log(chalk.red('Game over!'));
