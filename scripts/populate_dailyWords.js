@@ -12,6 +12,7 @@ const END_ARG = process.argv[2];
 const END_DATE = END_ARG ? new Date(END_ARG) : (() => { const d = new Date(); d.setMonth(d.getMonth() + 1); return d; })(); // default to one month from now
 const OUT_FILE = path.join(__dirname, '..', 'CLIGames-web', 'src', 'js', 'words_dailyWords.js');
 const OUT_FILE_2 = path.join(__dirname, '..', 'Wrdli', 'wrdli_words.js');
+const FAILURE_THRESHOLD = 10;
 
 function formatDateAsYMD(date) {
   const d = new Date(date);
@@ -45,11 +46,13 @@ function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 async function main() {
   if (typeof fetch === 'undefined') {
-    console.error('This script requires Node 18+ with global fetch.');
-    process.exit(1);
+    const errMsg = 'This script requires Node.js 18 or later with native fetch support.';
+    console.error(errMsg);
+    throw new Error(errMsg);
   }
 
   const results = [];
+  const failedDates = [];
   for (let d = new Date(START_DATE); d <= END_DATE; d.setDate(d.getDate() + 1)) {
     const cur = new Date(d); // copy
     const sol = await fetchSolutionForDate(cur);
@@ -58,8 +61,16 @@ async function main() {
       console.log(`${formatDateAsYMD(cur)} -> ${sol}`);
       process.stdout.write('.');
     } else {
+      failedDates.push(formatDateAsYMD(cur));
       process.stdout.write('x');
     }
+  }
+
+  // Check for excessive errors in Wordle fetch
+  if (failedDates.length > FAILURE_THRESHOLD) {
+    console.error(`\nERROR: ${failedDates.length} dates failed to fetch Wordle solutions (threshold: ${FAILURE_THRESHOLD})`);
+    console.error(`Failed dates: ${failedDates.slice(0, 20).join(', ')}${failedDates.length > 20 ? '...' : ''}`);
+    throw new Error(`Wordle fetch failed for ${failedDates.length} dates`);
   }
 
   // Writes a JS file suitable for pasting into wrdli.js or importing.
@@ -106,8 +117,9 @@ async function fetchConnectionsForDate(d) {
 
 async function mainConnections() {
   if (typeof fetch === 'undefined') {
-    console.error('This script requires Node 18+ with global fetch.');
-    process.exit(1);
+    const errMsg = 'This script requires Node.js 18 or later with native fetch support.';
+    console.error(errMsg);
+    throw new Error(errMsg);
   }
   console.log(`Fetching Connections puzzles from ${formatDateAsYMD(CSTART_DATE)} to ${formatDateAsYMD(CEND_DATE)}...`);
   const results = [];
@@ -132,6 +144,13 @@ async function mainConnections() {
     if (total % 50 === 0) console.log(`Processed ${total} dates...`);
   }
 
+  // Check for excessive errors in Connections fetch
+  if (failed.length > FAILURE_THRESHOLD) {
+    console.error(`ERROR: ${failed.length} Connections dates failed to fetch (threshold: ${FAILURE_THRESHOLD})`);
+    console.error(`Failed dates: ${failed.slice(0, 20).join(', ')}${failed.length > 20 ? '...' : ''}`);
+    throw new Error(`Connections fetch failed for ${failed.length} dates`);
+  }
+
   // Write failures to a log for inspection (prevents terminal flooding)
   if (failed.length > 0) {
     console.log(`Failures: ${failed.length} dates`);
@@ -149,12 +168,24 @@ async function mainConnections() {
   }`, 'utf8');
   } catch (err) {
     console.error(`Failed to write output files: ${err && err.message ? err.message : String(err)}`);
+    throw err;
   }
 }
 
-// Run and ensure we don't exit with failure; log errors and exit 0 so caller can inspect outputs/logs.
-mainConnections().catch(err => {
-  console.error('Fatal error in mainConnections:', err && err.message ? err.message : String(err));
-}).finally(() => {
-  console.log('mainConnections finished (see logs for details).');
-});
+// Run both functions and check results. Allow both to complete even if one fails.
+Promise.allSettled([main(), mainConnections()])
+  .then(results => {
+    const failed = results.filter(r => r.status === 'rejected');
+    if (failed.length > 0) {
+      console.error('\nFatal error(s) during populate:');
+      failed.forEach((result, index) => {
+        const reason = result.reason && result.reason.message ? result.reason.message : String(result.reason);
+        console.error(`  ${index + 1}. ${reason}`);
+      });
+      process.exit(1);
+    }
+  })
+  .catch(err => {
+    console.error('Unexpected error:', err && err.message ? err.message : String(err));
+    process.exit(1);
+  });
