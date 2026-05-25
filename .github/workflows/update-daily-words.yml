@@ -25,7 +25,7 @@ jobs:
         run: |
           set -euo pipefail
           if [ -z "${CROSS_REPO_PUSH_TOKEN}" ]; then
-            echo "CROSS_REPO_PUSH_TOKEN is required for cross-repository pushes."
+            echo "CROSS_REPO_PUSH_TOKEN secret is not set. Please configure it in repository settings to enable cross-repository pushes."
             exit 1
           fi
 
@@ -72,12 +72,12 @@ jobs:
             local dst="$2"
 
             if [ ! -f "${src}" ]; then
-              echo "Source file missing: ${src}"
+              echo "Source file missing: ${src}. Verify that the populate script completed successfully."
               exit 1
             fi
 
             if [ ! -d "$(dirname "${dst}")" ]; then
-              echo "Destination directory missing: $(dirname "${dst}")"
+              echo "Destination directory missing: $(dirname "${dst}"). Verify that the target repository was checked out correctly."
               exit 1
             fi
 
@@ -117,17 +117,11 @@ jobs:
             fi
 
             if [ -z "${branch}" ]; then
-              branch="$(git -C "${repo_dir}" symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null | sed 's|^origin/||' || true)"
-              if [ -n "${branch}" ]; then
-                echo "Using remote default branch ${branch} for ${repo_dir}"
-              else
-                echo "origin/HEAD not set for ${repo_dir}; falling back to main"
-              fi
-            fi
-
-            if [ -z "${branch}" ]; then
+              echo "No branch detected for ${repo_dir}; falling back to main"
               branch="main"
             fi
+
+            echo "Pushing ${repo_dir} to ${branch}"
 
             git -C "${repo_dir}" push origin "${branch}"
           }
