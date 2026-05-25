@@ -12,6 +12,7 @@ const END_ARG = process.argv[2];
 const END_DATE = END_ARG ? new Date(END_ARG) : (() => { const d = new Date(); d.setMonth(d.getMonth() + 1); return d; })(); // default to one month from now
 const OUT_FILE = path.join(__dirname, '..', 'CLIGames-web', 'src', 'js', 'words_dailyWords.js');
 const OUT_FILE_2 = path.join(__dirname, '..', 'Wrdli', 'wrdli_words.js');
+const FAILURE_THRESHOLD = 10;
 
 function formatDateAsYMD(date) {
   const d = new Date(date);
@@ -45,8 +46,9 @@ function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 async function main() {
   if (typeof fetch === 'undefined') {
-    console.error('This script requires Node 18+ with global fetch.');
-    throw new Error('Node 18+ with global fetch required');
+    const errMsg = 'This script requires Node 18+ with global fetch.';
+    console.error(errMsg);
+    throw new Error(errMsg);
   }
 
   const results = [];
@@ -65,8 +67,8 @@ async function main() {
   }
 
   // Check for excessive errors in Wordle fetch
-  if (failedDates.length > 10) {
-    console.error(`\nERROR: ${failedDates.length} dates failed to fetch Wordle solutions (threshold: 10)`);
+  if (failedDates.length > FAILURE_THRESHOLD) {
+    console.error(`\nERROR: ${failedDates.length} dates failed to fetch Wordle solutions (threshold: ${FAILURE_THRESHOLD})`);
     console.error(`Failed dates: ${failedDates.slice(0, 20).join(', ')}${failedDates.length > 20 ? '...' : ''}`);
     throw new Error(`Wordle fetch failed for ${failedDates.length} dates`);
   }
@@ -115,8 +117,9 @@ async function fetchConnectionsForDate(d) {
 
 async function mainConnections() {
   if (typeof fetch === 'undefined') {
-    console.error('This script requires Node 18+ with global fetch.');
-    throw new Error('Node 18+ with global fetch required');
+    const errMsg = 'This script requires Node 18+ with global fetch.';
+    console.error(errMsg);
+    throw new Error(errMsg);
   }
   console.log(`Fetching Connections puzzles from ${formatDateAsYMD(CSTART_DATE)} to ${formatDateAsYMD(CEND_DATE)}...`);
   const results = [];
@@ -142,8 +145,8 @@ async function mainConnections() {
   }
 
   // Check for excessive errors in Connections fetch
-  if (failed.length > 10) {
-    console.error(`ERROR: ${failed.length} Connections dates failed to fetch (threshold: 10)`);
+  if (failed.length > FAILURE_THRESHOLD) {
+    console.error(`ERROR: ${failed.length} Connections dates failed to fetch (threshold: ${FAILURE_THRESHOLD})`);
     console.error(`Failed dates: ${failed.slice(0, 20).join(', ')}${failed.length > 20 ? '...' : ''}`);
     throw new Error(`Connections fetch failed for ${failed.length} dates`);
   }
