@@ -1,9 +1,10 @@
 name: Update Daily Words & Puzzles
 
-'on':
+on:
   schedule:
+    # Run every 2 weeks (every Monday at midnight UTC)
     - cron: '0 0 * * 1'
-  workflow_dispatch:
+  workflow_dispatch:  # Allow manual trigger
 
 permissions:
   contents: write
@@ -11,122 +12,35 @@ permissions:
 jobs:
   populate:
     runs-on: ubuntu-latest
-    env:
-      COMMIT_MESSAGE: 'chore: update daily words and puzzles'
     steps:
       - name: Checkout CLIWordGames
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          repository: 28pins/CLIWordGames
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Validate cross-repo token
-        env:
-          CROSS_REPO_PUSH_TOKEN: ${{ secrets.CROSS_REPO_PUSH_TOKEN }}
-        run: |
-          set -euo pipefail
-          if [ -z "${CROSS_REPO_PUSH_TOKEN}" ]; then
-            echo "CROSS_REPO_PUSH_TOKEN secret is not set. Please configure it in repository settings to enable cross-repository pushes."
-            exit 1
-          fi
-
-      - name: Checkout CLIGames-web
-        uses: actions/checkout@v4
-        with:
-          repository: 28pins/CLIGames-web
-          token: ${{ secrets.CROSS_REPO_PUSH_TOKEN }}
-          path: ../CLIGames-web
-          fetch-depth: 0
-
-      - name: Checkout Wrdli
-        uses: actions/checkout@v4
-        with:
-          repository: 28pins/Wrdli
-          token: ${{ secrets.CROSS_REPO_PUSH_TOKEN }}
-          path: ../Wrdli
-          fetch-depth: 0
-
-      - name: Checkout Cli-nnections
-        uses: actions/checkout@v4
-        with:
-          repository: 28pins/Cli-nnections
-          token: ${{ secrets.CROSS_REPO_PUSH_TOKEN }}
-          path: ../Cli-nnections
-          fetch-depth: 0
-
-      - name: Setup Node.js 20
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
       - name: Run populate script
-        working-directory: ${{ github.workspace }}
         run: node scripts/populate_dailyWords.js
 
-      - name: Sync generated data to sibling repositories
+      - name: Commit and push CLIWordGames changes
+        working-directory: CLIWordGames
         run: |
-          set -euo pipefail
-          SOURCE_ROOT="${GITHUB_WORKSPACE}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "chore: Update daily words and puzzles" || echo "No changes in CLIWordGames"
+          git pus
 
-          copy_file() {
-            local src="$1"
-            local dst="$2"
-
-            if [ ! -f "${src}" ]; then
-              echo "Source file missing: ${src}. Verify that the populate script completed successfully."
-              exit 1
-            fi
-
-            if [ ! -d "$(dirname "${dst}")" ]; then
-              echo "Destination directory missing: $(dirname "${dst}"). Verify that the target repository was checked out correctly."
-              exit 1
-            fi
-
-            cp "${src}" "${dst}"
-          }
-
-          copy_file "${SOURCE_ROOT}/CLIGames-web/src/js/words_dailyWords.js" "${GITHUB_WORKSPACE}/../CLIGames-web/src/js/words_dailyWords.js"
-          copy_file "${SOURCE_ROOT}/CLIGames-web/src/js/categories_dailyPuzzles.js" "${GITHUB_WORKSPACE}/../CLIGames-web/src/js/categories_dailyPuzzles.js"
-          copy_file "${SOURCE_ROOT}/Wrdli/wrdli_words.js" "${GITHUB_WORKSPACE}/../Wrdli/wrdli_words.js"
-          copy_file "${SOURCE_ROOT}/Cli-nnections/cli-nnections_puzzles.js" "${GITHUB_WORKSPACE}/../Cli-nnections/cli-nnections_puzzles.js"
-
-      - name: Commit and push updates
+      - name: Commit and push CLIGames-web changes
+        working-directory: ../CLIGames-web
         run: |
-          set -euo pipefail
-
-          update_repo() {
-            local repo_dir="$1"
-            local branch="${2:-}"
-
-            if [ ! -d "${repo_dir}/.git" ]; then
-              echo "Skipping ${repo_dir}; not a git repository."
-              return
-            fi
-
-            if [ -z "$(git -C "${repo_dir}" status --porcelain)" ]; then
-              echo "No changes in ${repo_dir}"
-              return
-            fi
-
-            git -C "${repo_dir}" config user.name "github-actions[bot]"
-            git -C "${repo_dir}" config user.email "github-actions[bot]@users.noreply.github.com"
-            git -C "${repo_dir}" add -A
-            git -C "${repo_dir}" commit -m "${COMMIT_MESSAGE}"
-
-            if [ -z "${branch}" ] || [ "${branch}" = "HEAD" ]; then
-              branch="$(git -C "${repo_dir}" symbolic-ref --quiet --short HEAD || true)"
-            fi
-
-            if [ -z "${branch}" ]; then
-              echo "No branch detected for ${repo_dir}; falling back to main"
-              branch="main"
-            fi
-
-            echo "Pushing ${repo_dir} to ${branch}"
-
-            git -C "${repo_dir}" push origin "${branch}"
-          }
-
-          update_repo "${GITHUB_WORKSPACE}" "${GITHUB_REF_NAME}"
-          update_repo "${GITHUB_WORKSPACE}/../CLIGames-web"
-          update_repo "${GITHUB_WORKSPACE}/../Wrdli"
-          update_repo "${GITHUB_WORKSPACE}/../Cli-nnections"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "chore: Update daily words" || echo "No changes in CLIGames-web"
+          git push
