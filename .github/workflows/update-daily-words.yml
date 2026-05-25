@@ -1,0 +1,46 @@
+name: Update Daily Words & Puzzles
+
+on:
+  schedule:
+    # Run every 2 weeks (every Monday at midnight UTC)
+    - cron: '0 0 * * 1'
+  workflow_dispatch:  # Allow manual trigger
+
+permissions:
+  contents: write
+
+jobs:
+  populate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout CLIWordGames
+        uses: actions/checkout@v4
+        with:
+          repository: 28pins/CLIWordGames
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run populate script
+        run: node scripts/populate_dailyWords.js
+
+      - name: Commit and push CLIWordGames changes
+        working-directory: CLIWordGames
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "chore: Update daily words and puzzles" || echo "No changes in CLIWordGames"
+          git pus
+
+      - name: Commit and push CLIGames-web changes
+        working-directory: ../CLIGames-web
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "chore: Update daily words" || echo "No changes in CLIGames-web"
+          git push
