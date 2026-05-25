@@ -172,20 +172,4 @@ async function mainConnections() {
   }
 }
 
-// Run both functions and check results. Allow both to complete even if one fails.
-Promise.allSettled([main(), mainConnections()])
-  .then(results => {
-    const failed = results.filter(r => r.status === 'rejected');
-    if (failed.length > 0) {
-      console.error('\nFatal error(s) during populate:');
-      failed.forEach((result, index) => {
-        const reason = result.reason && result.reason.message ? result.reason.message : String(result.reason);
-        console.error(`  ${index + 1}. ${reason}`);
-      });
-      process.exit(1);
-    }
-  })
-  .catch(err => {
-    console.error('Unexpected error:', err && err.message ? err.message : String(err));
-    process.exit(1);
-  });
+mainConnections().catch(err => { console.error(err); process.exit(1); });
