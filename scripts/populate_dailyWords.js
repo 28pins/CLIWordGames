@@ -46,7 +46,7 @@ function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 async function main() {
   if (typeof fetch === 'undefined') {
-    const errMsg = 'This script requires Node 18+ with global fetch.';
+    const errMsg = 'This script requires Node.js 18 or later with native fetch support.';
     console.error(errMsg);
     throw new Error(errMsg);
   }
@@ -117,7 +117,7 @@ async function fetchConnectionsForDate(d) {
 
 async function mainConnections() {
   if (typeof fetch === 'undefined') {
-    const errMsg = 'This script requires Node 18+ with global fetch.';
+    const errMsg = 'This script requires Node.js 18 or later with native fetch support.';
     console.error(errMsg);
     throw new Error(errMsg);
   }
@@ -172,9 +172,20 @@ async function mainConnections() {
   }
 }
 
-// Run both and exit with appropriate status code
-Promise.all([main(), mainConnections()])
+// Run both functions and check results. Allow both to complete even if one fails.
+Promise.allSettled([main(), mainConnections()])
+  .then(results => {
+    const failed = results.filter(r => r.status === 'rejected');
+    if (failed.length > 0) {
+      console.error('\nFatal error(s) during populate:');
+      failed.forEach((result, index) => {
+        const reason = result.reason && result.reason.message ? result.reason.message : String(result.reason);
+        console.error(`  ${index + 1}. ${reason}`);
+      });
+      process.exit(1);
+    }
+  })
   .catch(err => {
-    console.error('\nFatal error during populate:', err && err.message ? err.message : String(err));
+    console.error('Unexpected error:', err && err.message ? err.message : String(err));
     process.exit(1);
   });
