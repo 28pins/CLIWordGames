@@ -24,23 +24,49 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Run populate script
+      - name: Run populate script (attempt 1)
+        id: populate_attempt_1
+        continue-on-error: true
         run: node scripts/populate_dailyWords.js
 
-      - name: Commit and push CLIWordGames changes
-        working-directory: CLIWordGames
+      - name: Run populate script (attempt 2)
+        if: steps.populate_attempt_1.outcome == 'failure'
+        id: populate_attempt_2
+        continue-on-error: true
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add .
-          git commit -m "chore: Update daily words and puzzles" || echo "No changes in CLIWordGames"
-          git pus
+          echo "First attempt failed, retrying..."
+          node scripts/populate_dailyWords.js
 
-      - name: Commit and push CLIGames-web changes
-        working-directory: ../CLIGames-web
+      - name: Check if populate failed twice
+        if: steps.populate_attempt_2.outcome == 'failure'
+        run: |
+          echo "Populate script failed twice, will notify maintainer"
+          exit 1
+
+      - name: Commit and push changes
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add .
-          git commit -m "chore: Update daily words" || echo "No changes in CLIGames-web"
+          git commit -m "chore: Update daily words and puzzles" || echo "No changes to commit"
           git push
+
+      - name: Notify on failure
+        if: failure()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.MAIL_SERVER }}
+          server_port: ${{ secrets.MAIL_PORT }}
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: "❌ Daily Words & Puzzles Update Failed"
+          body: |
+            The populate script failed twice during execution. 
+            
+            Check logs: https://github.com/28pins/CLIWordGames/actions/runs/${{ github.run_id }}
+            
+            Possible causes:
+            - NYT API temporarily unavailable
+            - Network connectivity issues
+            - Script logic error
+          to: dev28pins@icloud.com

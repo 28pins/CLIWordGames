@@ -46,10 +46,11 @@ function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 async function main() {
   if (typeof fetch === 'undefined') {
     console.error('This script requires Node 18+ with global fetch.');
-    process.exit(1);
+    throw new Error('Node 18+ with global fetch required');
   }
 
   const results = [];
+  const failedDates = [];
   for (let d = new Date(START_DATE); d <= END_DATE; d.setDate(d.getDate() + 1)) {
     const cur = new Date(d); // copy
     const sol = await fetchSolutionForDate(cur);
@@ -58,8 +59,16 @@ async function main() {
       console.log(`${formatDateAsYMD(cur)} -> ${sol}`);
       process.stdout.write('.');
     } else {
+      failedDates.push(formatDateAsYMD(cur));
       process.stdout.write('x');
     }
+  }
+
+  // Check for excessive errors in Wordle fetch
+  if (failedDates.length > 10) {
+    console.error(`\nERROR: ${failedDates.length} dates failed to fetch Wordle solutions (threshold: 10)`);
+    console.error(`Failed dates: ${failedDates.slice(0, 20).join(', ')}${failedDates.length > 20 ? '...' : ''}`);
+    throw new Error(`Wordle fetch failed for ${failedDates.length} dates`);
   }
 
   // Writes a JS file suitable for pasting into wrdli.js or importing.
@@ -107,7 +116,7 @@ async function fetchConnectionsForDate(d) {
 async function mainConnections() {
   if (typeof fetch === 'undefined') {
     console.error('This script requires Node 18+ with global fetch.');
-    process.exit(1);
+    throw new Error('Node 18+ with global fetch required');
   }
   console.log(`Fetching Connections puzzles from ${formatDateAsYMD(CSTART_DATE)} to ${formatDateAsYMD(CEND_DATE)}...`);
   const results = [];
@@ -132,6 +141,13 @@ async function mainConnections() {
     if (total % 50 === 0) console.log(`Processed ${total} dates...`);
   }
 
+  // Check for excessive errors in Connections fetch
+  if (failed.length > 10) {
+    console.error(`ERROR: ${failed.length} Connections dates failed to fetch (threshold: 10)`);
+    console.error(`Failed dates: ${failed.slice(0, 20).join(', ')}${failed.length > 20 ? '...' : ''}`);
+    throw new Error(`Connections fetch failed for ${failed.length} dates`);
+  }
+
   // Write failures to a log for inspection (prevents terminal flooding)
   if (failed.length > 0) {
     console.log(`Failures: ${failed.length} dates`);
@@ -149,12 +165,13 @@ async function mainConnections() {
   }`, 'utf8');
   } catch (err) {
     console.error(`Failed to write output files: ${err && err.message ? err.message : String(err)}`);
+    throw err;
   }
 }
 
-// Run and ensure we don't exit with failure; log errors and exit 0 so caller can inspect outputs/logs.
-mainConnections().catch(err => {
-  console.error('Fatal error in mainConnections:', err && err.message ? err.message : String(err));
-}).finally(() => {
-  console.log('mainConnections finished (see logs for details).');
-});
+// Run both and exit with appropriate status code
+Promise.all([main(), mainConnections()])
+  .catch(err => {
+    console.error('\nFatal error during populate:', err && err.message ? err.message : String(err));
+    process.exit(1);
+  });
