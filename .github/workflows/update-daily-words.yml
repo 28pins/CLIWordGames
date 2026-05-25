@@ -13,22 +13,45 @@ jobs:
     runs-on: ubuntu-latest
     env:
       OWNER: 28pins
-      PUSH_TOKEN: ${{ secrets.CROSS_REPO_PUSH_TOKEN || secrets.GITHUB_TOKEN }}
+      PUSH_TOKEN: ${{ secrets.CROSS_REPO_PUSH_TOKEN }}
       COMMIT_MESSAGE: 'chore: update daily words and puzzles'
     steps:
       - name: Checkout CLIWordGames
         uses: actions/checkout@v4
         with:
-          token: ${{ env.PUSH_TOKEN }}
           fetch-depth: 0
 
-      - name: Clone sibling repositories
+      - name: Validate cross-repo token
         run: |
           set -euo pipefail
-          cd /home/runner/work
-          git clone "https://x-access-token:${PUSH_TOKEN}@github.com/${OWNER}/CLIGames-web.git" CLIGames-web
-          git clone "https://x-access-token:${PUSH_TOKEN}@github.com/${OWNER}/Wrdli.git" Wrdli
-          git clone "https://x-access-token:${PUSH_TOKEN}@github.com/${OWNER}/Cli-nnections.git" Cli-nnections
+          if [ -z "${PUSH_TOKEN}" ]; then
+            echo "CROSS_REPO_PUSH_TOKEN is required for cross-repository pushes."
+            exit 1
+          fi
+
+      - name: Checkout CLIGames-web
+        uses: actions/checkout@v4
+        with:
+          repository: 28pins/CLIGames-web
+          token: ${{ env.PUSH_TOKEN }}
+          path: ../CLIGames-web
+          fetch-depth: 0
+
+      - name: Checkout Wrdli
+        uses: actions/checkout@v4
+        with:
+          repository: 28pins/Wrdli
+          token: ${{ env.PUSH_TOKEN }}
+          path: ../Wrdli
+          fetch-depth: 0
+
+      - name: Checkout Cli-nnections
+        uses: actions/checkout@v4
+        with:
+          repository: 28pins/Cli-nnections
+          token: ${{ env.PUSH_TOKEN }}
+          path: ../Cli-nnections
+          fetch-depth: 0
 
       - name: Setup Node.js 20
         uses: actions/setup-node@v4
@@ -36,16 +59,34 @@ jobs:
           node-version: '20'
 
       - name: Run populate script
-        working-directory: /home/runner/work/CLIWordGames/CLIWordGames
+        working-directory: ${{ github.workspace }}
         run: node scripts/populate_dailyWords.js
 
       - name: Sync generated data to sibling repositories
         run: |
           set -euo pipefail
-          cp /home/runner/work/CLIWordGames/CLIWordGames/CLIGames-web/src/js/words_dailyWords.js /home/runner/work/CLIGames-web/src/js/words_dailyWords.js
-          cp /home/runner/work/CLIWordGames/CLIWordGames/CLIGames-web/src/js/categories_dailyPuzzles.js /home/runner/work/CLIGames-web/src/js/categories_dailyPuzzles.js
-          cp /home/runner/work/CLIWordGames/CLIWordGames/Wrdli/wrdli_words.js /home/runner/work/Wrdli/wrdli_words.js
-          cp /home/runner/work/CLIWordGames/CLIWordGames/Cli-nnections/cli-nnections_puzzles.js /home/runner/work/Cli-nnections/cli-nnections_puzzles.js
+
+          copy_file() {
+            local src="$1"
+            local dst="$2"
+
+            if [ ! -f "${src}" ]; then
+              echo "Source file missing: ${src}"
+              exit 1
+            fi
+
+            if [ ! -d "$(dirname "${dst}")" ]; then
+              echo "Destination directory missing: $(dirname "${dst}")"
+              exit 1
+            fi
+
+            cp "${src}" "${dst}"
+          }
+
+          copy_file "${GITHUB_WORKSPACE}/CLIGames-web/src/js/words_dailyWords.js" "${GITHUB_WORKSPACE}/../CLIGames-web/src/js/words_dailyWords.js"
+          copy_file "${GITHUB_WORKSPACE}/CLIGames-web/src/js/categories_dailyPuzzles.js" "${GITHUB_WORKSPACE}/../CLIGames-web/src/js/categories_dailyPuzzles.js"
+          copy_file "${GITHUB_WORKSPACE}/Wrdli/wrdli_words.js" "${GITHUB_WORKSPACE}/../Wrdli/wrdli_words.js"
+          copy_file "${GITHUB_WORKSPACE}/Cli-nnections/cli-nnections_puzzles.js" "${GITHUB_WORKSPACE}/../Cli-nnections/cli-nnections_puzzles.js"
 
       - name: Commit and push updates
         run: |
@@ -75,13 +116,17 @@ jobs:
             fi
 
             if [ -z "${branch}" ]; then
-              branch="$(git -C "${repo_dir}" remote show origin | sed -n '/HEAD branch/s/.*: //p')"
+              branch="$(git -C "${repo_dir}" symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null | sed 's|^origin/||')"
+            fi
+
+            if [ -z "${branch}" ]; then
+              branch="main"
             fi
 
             git -C "${repo_dir}" push origin "${branch}"
           }
 
-          update_repo "/home/runner/work/CLIWordGames/CLIWordGames" "${GITHUB_REF_NAME}"
-          update_repo "/home/runner/work/CLIGames-web"
-          update_repo "/home/runner/work/Wrdli"
-          update_repo "/home/runner/work/Cli-nnections"
+          update_repo "${GITHUB_WORKSPACE}" "${GITHUB_REF_NAME}"
+          update_repo "${GITHUB_WORKSPACE}/../CLIGames-web"
+          update_repo "${GITHUB_WORKSPACE}/../Wrdli"
+          update_repo "${GITHUB_WORKSPACE}/../Cli-nnections"
