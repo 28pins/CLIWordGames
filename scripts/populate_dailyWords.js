@@ -173,3 +173,283 @@ async function mainConnections() {
 }
 
 mainConnections().catch(err => { console.error(err); process.exit(1); });
+
+/// SPELLING BEE
+const SBSTART_DATE = new Date('2023-07-03');
+const SBEND_DATE = (() => { const d = new Date(); d.setMonth(d.getMonth() + 1); return d; })();
+const SBOUT_FILE = path.join(__dirname, '..', 'CLIGames-web', 'src', 'js', 'spelling_bee_dailyPuzzles.js');
+const SBOUT_FILE_2 = path.join(__dirname, '..', 'SpellingBee', 'spelling_bee_puzzles.js');
+
+async function fetchSpellingBeeForDate(d) {
+  const dateStr = d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0');
+  const url = `https://www.nytimes.com/svc/spelling-bee/game/${dateStr}.json`;
+  const maxRetries = 3;
+  let attempt = 0;
+  while (attempt < maxRetries) {
+    try {
+      const res = await fetch(url);
+      if (!res.ok) {
+        attempt++;
+        continue;
+      }
+      const json = await res.json();
+      return json;
+    } catch (err) {
+      attempt++;
+    }
+  }
+  return null;
+}
+
+async function mainSpellingBee() {
+  if (typeof fetch === 'undefined') {
+    const errMsg = 'This script requires Node.js 18 or later with native fetch support.';
+    console.error(errMsg);
+    throw new Error(errMsg);
+  }
+  console.log(`Fetching Spelling Bee puzzles from ${formatDateAsYMD(SBSTART_DATE)} to ${formatDateAsYMD(SBEND_DATE)}...`);
+  const results = [];
+  const failed = [];
+  let total = 0;
+  for (let d = new Date(SBSTART_DATE); d <= SBEND_DATE; d.setDate(d.getDate() + 1)) {
+    const cur = new Date(d);
+    total++;
+    try {
+      const puzzle = await fetchSpellingBeeForDate(cur);
+      if (puzzle) {
+        results.push(puzzle);
+        console.log(`${formatDateAsYMD(cur)} -> Spelling Bee`);
+      } else {
+        failed.push(formatDateAsYMD(cur));
+      }
+    } catch (err) {
+      failed.push(formatDateAsYMD(cur));
+    }
+    if (total % 50 === 0) console.log(`Processed ${total} dates...`);
+  }
+
+  if (failed.length > FAILURE_THRESHOLD) {
+    console.error(`Warning: ${failed.length} Spelling Bee dates failed (threshold: ${FAILURE_THRESHOLD})`);
+  }
+
+  const fileContent = `const dailyPuzzles = [${results.map(p => `  ${JSON.stringify(p)}`).join(',\n')}];\n`;
+  try {
+    fs.writeFileSync(SBOUT_FILE, fileContent, 'utf8');
+    fs.writeFileSync(SBOUT_FILE_2, fileContent + `\n\nmodule.exports = {\n  dailyPuzzles\n}`, 'utf8');
+    console.log(`Wrote ${results.length} Spelling Bee puzzles`);
+  } catch (err) {
+    console.error(`Failed to write Spelling Bee files: ${err && err.message ? err.message : String(err)}`);
+  }
+}
+
+/// MINI CROSSWORD
+const MINISTART_DATE = new Date('2023-01-02');
+const MINIEND_DATE = (() => { const d = new Date(); d.setMonth(d.getMonth() + 1); return d; })();
+const MINIOUT_FILE = path.join(__dirname, '..', 'CLIGames-web', 'src', 'js', 'mini_dailyPuzzles.js');
+const MINIOUT_FILE_2 = path.join(__dirname, '..', 'Mini', 'mini_puzzles.js');
+
+async function fetchMiniForDate(d) {
+  const dateStr = formatDateAsYMD(d);
+  const url = `https://www.nytimes.com/svc/crosswords/v6/puzzle/mini/${dateStr}.json`;
+  const maxRetries = 3;
+  let attempt = 0;
+  while (attempt < maxRetries) {
+    try {
+      const res = await fetch(url);
+      if (!res.ok) {
+        attempt++;
+        continue;
+      }
+      const json = await res.json();
+      return json;
+    } catch (err) {
+      attempt++;
+    }
+  }
+  return null;
+}
+
+async function mainMini() {
+  if (typeof fetch === 'undefined') {
+    const errMsg = 'This script requires Node.js 18 or later with native fetch support.';
+    console.error(errMsg);
+    throw new Error(errMsg);
+  }
+  console.log(`Fetching Mini crosswords from ${formatDateAsYMD(MINISTART_DATE)} to ${formatDateAsYMD(MINIEND_DATE)}...`);
+  const results = [];
+  const failed = [];
+  let total = 0;
+  for (let d = new Date(MINISTART_DATE); d <= MINIEND_DATE; d.setDate(d.getDate() + 1)) {
+    const cur = new Date(d);
+    total++;
+    try {
+      const puzzle = await fetchMiniForDate(cur);
+      if (puzzle) {
+        results.push(puzzle);
+        console.log(`${formatDateAsYMD(cur)} -> Mini`);
+      } else {
+        failed.push(formatDateAsYMD(cur));
+      }
+    } catch (err) {
+      failed.push(formatDateAsYMD(cur));
+    }
+    if (total % 50 === 0) console.log(`Processed ${total} dates...`);
+  }
+
+  if (failed.length > FAILURE_THRESHOLD) {
+    console.error(`Warning: ${failed.length} Mini dates failed (threshold: ${FAILURE_THRESHOLD})`);
+  }
+
+  const fileContent = `const dailyPuzzles = [${results.map(p => `  ${JSON.stringify(p)}`).join(',\n')}];\n`;
+  try {
+    fs.writeFileSync(MINIOUT_FILE, fileContent, 'utf8');
+    fs.writeFileSync(MINIOUT_FILE_2, fileContent + `\n\nmodule.exports = {\n  dailyPuzzles\n}`, 'utf8');
+    console.log(`Wrote ${results.length} Mini crosswords`);
+  } catch (err) {
+    console.error(`Failed to write Mini files: ${err && err.message ? err.message : String(err)}`);
+  }
+}
+
+/// MIDI CROSSWORD
+const MIDISTART_DATE = new Date('2023-07-10');
+const MIDIEND_DATE = (() => { const d = new Date(); d.setMonth(d.getMonth() + 1); return d; })();
+const MIDIOUT_FILE = path.join(__dirname, '..', 'CLIGames-web', 'src', 'js', 'midi_dailyPuzzles.js');
+const MIDIOUT_FILE_2 = path.join(__dirname, '..', 'Midi', 'midi_puzzles.js');
+
+async function fetchMidiForDate(d) {
+  const dateStr = formatDateAsYMD(d);
+  const url = `https://www.nytimes.com/svc/crosswords/v6/puzzle/midi/${dateStr}.json`;
+  const maxRetries = 3;
+  let attempt = 0;
+  while (attempt < maxRetries) {
+    try {
+      const res = await fetch(url);
+      if (!res.ok) {
+        attempt++;
+        continue;
+      }
+      const json = await res.json();
+      return json;
+    } catch (err) {
+      attempt++;
+    }
+  }
+  return null;
+}
+
+async function mainMidi() {
+  if (typeof fetch === 'undefined') {
+    const errMsg = 'This script requires Node.js 18 or later with native fetch support.';
+    console.error(errMsg);
+    throw new Error(errMsg);
+  }
+  console.log(`Fetching MIDI crosswords from ${formatDateAsYMD(MIDISTART_DATE)} to ${formatDateAsYMD(MIDIEND_DATE)}...`);
+  const results = [];
+  const failed = [];
+  let total = 0;
+  for (let d = new Date(MIDISTART_DATE); d <= MIDIEND_DATE; d.setDate(d.getDate() + 1)) {
+    const cur = new Date(d);
+    total++;
+    try {
+      const puzzle = await fetchMidiForDate(cur);
+      if (puzzle) {
+        results.push(puzzle);
+        console.log(`${formatDateAsYMD(cur)} -> MIDI`);
+      } else {
+        failed.push(formatDateAsYMD(cur));
+      }
+    } catch (err) {
+      failed.push(formatDateAsYMD(cur));
+    }
+    if (total % 50 === 0) console.log(`Processed ${total} dates...`);
+  }
+
+  if (failed.length > FAILURE_THRESHOLD) {
+    console.error(`Warning: ${failed.length} MIDI dates failed (threshold: ${FAILURE_THRESHOLD})`);
+  }
+
+  const fileContent = `const dailyPuzzles = [${results.map(p => `  ${JSON.stringify(p)}`).join(',\n')}];\n`;
+  try {
+    fs.writeFileSync(MIDIOUT_FILE, fileContent, 'utf8');
+    fs.writeFileSync(MIDIOUT_FILE_2, fileContent + `\n\nmodule.exports = {\n  dailyPuzzles\n}`, 'utf8');
+    console.log(`Wrote ${results.length} MIDI crosswords`);
+  } catch (err) {
+    console.error(`Failed to write MIDI files: ${err && err.message ? err.message : String(err)}`);
+  }
+}
+
+/// PIPS
+const PIPSSTART_DATE = new Date('2024-08-05');
+const PIPSEND_DATE = (() => { const d = new Date(); d.setMonth(d.getMonth() + 1); return d; })();
+const PIPSOUT_FILE = path.join(__dirname, '..', 'CLIGames-web', 'src', 'js', 'pips_dailyPuzzles.js');
+const PIPSOUT_FILE_2 = path.join(__dirname, '..', 'Pips', 'pips_puzzles.js');
+
+async function fetchPipsForDate(d) {
+  const dateStr = d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0');
+  const url = `https://www.nytimes.com/svc/pips/game/${dateStr}.json`;
+  const maxRetries = 3;
+  let attempt = 0;
+  while (attempt < maxRetries) {
+    try {
+      const res = await fetch(url);
+      if (!res.ok) {
+        attempt++;
+        continue;
+      }
+      const json = await res.json();
+      return json;
+    } catch (err) {
+      attempt++;
+    }
+  }
+  return null;
+}
+
+async function mainPips() {
+  if (typeof fetch === 'undefined') {
+    const errMsg = 'This script requires Node.js 18 or later with native fetch support.';
+    console.error(errMsg);
+    throw new Error(errMsg);
+  }
+  console.log(`Fetching Pips puzzles from ${formatDateAsYMD(PIPSSTART_DATE)} to ${formatDateAsYMD(PIPSEND_DATE)}...`);
+  const results = [];
+  const failed = [];
+  let total = 0;
+  for (let d = new Date(PIPSSTART_DATE); d <= PIPSEND_DATE; d.setDate(d.getDate() + 1)) {
+    const cur = new Date(d);
+    total++;
+    try {
+      const puzzle = await fetchPipsForDate(cur);
+      if (puzzle) {
+        results.push(puzzle);
+        console.log(`${formatDateAsYMD(cur)} -> Pips`);
+      } else {
+        failed.push(formatDateAsYMD(cur));
+      }
+    } catch (err) {
+      failed.push(formatDateAsYMD(cur));
+    }
+    if (total % 50 === 0) console.log(`Processed ${total} dates...`);
+  }
+
+  if (failed.length > FAILURE_THRESHOLD) {
+    console.error(`Warning: ${failed.length} Pips dates failed (threshold: ${FAILURE_THRESHOLD})`);
+  }
+
+  const fileContent = `const dailyPuzzles = [${results.map(p => `  ${JSON.stringify(p)}`).join(',\n')}];\n`;
+  try {
+    fs.writeFileSync(PIPSOUT_FILE, fileContent, 'utf8');
+    fs.writeFileSync(PIPSOUT_FILE_2, fileContent + `\n\nmodule.exports = {\n  dailyPuzzles\n}`, 'utf8');
+    console.log(`Wrote ${results.length} Pips puzzles`);
+  } catch (err) {
+    console.error(`Failed to write Pips files: ${err && err.message ? err.message : String(err)}`);
+  }
+}
+
+// Run all fetch functions
+Promise.all([
+  mainSpellingBee(),
+  mainMini(),
+  mainMidi(),
+  mainPips()
+]).catch(err => { console.error(err); process.exit(1); });

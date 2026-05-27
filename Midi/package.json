@@ -1,0 +1,25 @@
+{
+  "name": "midi",
+  "version": "1.0.0",
+  "description": "A colorful MIDI Crossword CLI game",
+  "main": "Midi.js",
+  "bin": {
+    "midi": "./Midi.js"
+  },
+  "scripts": {
+    "start": "node Midi.js"
+  },
+  "keywords": [
+    "cli",
+    "midi",
+    "crossword",
+    "word-game",
+    "terminal"
+  ],
+  "author": "28Pins",
+  "license": "Custom No AI MIT Derivative",
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "inquirer": "^8.2.7"
+  }
+}
