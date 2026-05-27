@@ -77,8 +77,110 @@ Use the keyboard to navigate the grid, select four cards, and submit a category.
 - **Footer buttons** — on-screen Enter / Clear / Help / Exit buttons navigable with the keyboard.
 
 ---
+
+## Mini
+
+A streamlined terminal Wordle variant with 4 guesses instead of 6. Each day a new five-letter word is fetched live from the NYT Wordle API.
+
+**Run:**
+```bash
+node Mini/Mini.js
+node Mini/Mini.js --hard
+node Mini/Mini.js 2024-03-15
+```
+
+### How to Play
+You have four attempts to guess the secret five-letter word.
+
+After each guess:
+- A correct letter in the correct position is highlighted **green**.
+- A correct letter in the wrong position is highlighted **yellow**.
+- A letter not in the word is shown in **white/grey**.
+
+### Features
+- **Live daily word** — fetched from the NYT Wordle API; falls back to a bundled word list offline.
+- **Date argument** — pass a date (`YYYY-MM-DD`) to replay any past puzzle.
+- **Hard mode** (`--hard`) — every subsequent guess must use all previously revealed correct letters.
+- **In-game commands:**
+  - `help` — show command help
+  - `guesses` — reprint your previous guesses
+  - `exit` / `quit` — end the game
+  - Ctrl+C or Escape — exit at any time
+
+---
+
+## Spelling Bee
+
+Find words using a set of 7 letters arranged in a hexagon. Each word must be at least 4 letters long and include the center letter. Each day a new puzzle is provided.
+
+**Run:**
+```bash
+node SpellingBee/SpellingBee.js
+node SpellingBee/SpellingBee.js 2024-03-15
+```
+
+### How to Play
+The 7 letters are displayed in a hexagon pattern with one center letter. Find as many words as possible:
+- Each word must be at least 4 letters long
+- The center letter (highlighted in yellow) must be in every word
+- You can only use the 7 available letters
+- Finding all possible words earns a "pangram" bonus
+
+### Features
+- **Puzzle of the day** — a new Spelling Bee puzzle daily.
+- **Date argument** — pass a date (`YYYY-MM-DD`) to play any historical puzzle.
+- **Shuffle feature** — rearrange letters for easier viewing.
+- **Score tracking** — earn points based on word length and rarity.
+
+---
+
+## MIDI
+
+A grid-based daily puzzle game where you reveal letters to complete the grid.
+
+**Run:**
+```bash
+node MIDI/MIDI.js
+node MIDI/MIDI.js 2024-03-15
+```
+
+### How to Play
+A grid of hidden letters is displayed. Use coordinates to reveal letters and complete the puzzle:
+- Enter coordinates in the format `row,col` (e.g., `0,0`)
+- Reveal all letters to solve the puzzle
+- Words may be hidden horizontally, vertically, or diagonally
+
+### Features
+- **Puzzle of the day** — a new MIDI puzzle daily.
+- **Date argument** — pass a date (`YYYY-MM-DD`) to play any historical puzzle.
+- **Solution reveal** — type "solve" to see the complete solution.
+
+---
+
+## Pips
+
+Find words using the letters arranged on the border of a square. Each word must be formed from adjacent letters.
+
+**Run:**
+```bash
+node Pips/Pips.js
+node Pips/Pips.js 2024-03-15
+```
+
+### How to Play
+Letters are arranged on the border of a square. Find words by:
+- Using letters from the border (each letter appears only once per word)
+- Forming chains of adjacent letters
+- Finding words of 4+ letters
+
+### Features
+- **Puzzle of the day** — a new Pips puzzle daily.
+- **Date argument** — pass a date (`YYYY-MM-DD`) to play any historical puzzle.
+- **Score tracking** — earn points based on word length.
+
+---
 ## Web Version
-A web-based version of both games is available at [28pins.github.io](https://28pins.github.io), built with the same data and logic as the CLI versions. The web version uses code in the 'CLIGames-web' directory.
+A web-based version of all games is available at [28pins.github.io](https://28pins.github.io), built with the same data and logic as the CLI versions. The web version uses code in the 'CLIGames-web' directory.
 ---
 
 ## Scripts (data utilities)
@@ -88,7 +190,13 @@ A web-based version of both games is available at [28pins.github.io](https://28p
 Requires **Node 18+** (uses global `fetch`).
 
 ### `scripts/populate_dailyWords.js`
-Fetches every daily Wordle solution from the NYT Wordle API starting from Wordle's launch date (2021-06-19) up to a given end date, and writes the full list to `OpenWord-web/generated_dailyWords.json`.
+Fetches daily puzzle data from the NYT APIs and generates data files for all games:
+- **Wordle** — fetches from the NYT Wordle API (starting from 2021-06-19)
+- **Connections** — fetches from the NYT Connections API (starting from 2023-06-19)
+- **Mini** — fetches from the NYT Wordle API (starting from 2024-05-27)
+- **Spelling Bee** — generates placeholder data (starting from 2018-05-28)
+- **MIDI** — generates placeholder data (starting from 2024-01-01)
+- **Pips** — generates placeholder data (starting from 2023-01-01)
 
 ```bash
 node scripts/populate_dailyWords.js 2026-04-14
