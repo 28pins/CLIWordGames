@@ -517,8 +517,3 @@ const dailyPuzzles = [  {"border":["a","b","c","d","e","f","g","h"],"answers":["
   {"border":["a","b","c","d","e","f","g","h"],"answers":["abcd","bcde"]},
   {"border":["a","b","c","d","e","f","g","h"],"answers":["abcd","bcde"]}];
 const allWords = [];
-
-module.exports = {
-    dailyPuzzles,
-    allWords
-}

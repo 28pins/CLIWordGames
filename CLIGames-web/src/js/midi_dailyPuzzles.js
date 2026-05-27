@@ -151,7 +151,3 @@ const dailyPuzzles = [  {"grid":[["a","b","c"],["d","e","f"],["g","h","i"]]},
   {"grid":[["a","b","c"],["d","e","f"],["g","h","i"]]},
   {"grid":[["a","b","c"],["d","e","f"],["g","h","i"]]},
   {"grid":[["a","b","c"],["d","e","f"],["g","h","i"]]}];
-
-module.exports = {
-    dailyPuzzles
-}
