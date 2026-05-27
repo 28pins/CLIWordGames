@@ -77,22 +77,109 @@ Use the keyboard to navigate the grid, select four cards, and submit a category.
 - **Footer buttons** — on-screen Enter / Clear / Help / Exit buttons navigable with the keyboard.
 
 ---
+
+## Spelling Bee
+
+A terminal Spelling Bee clone. Each day a new puzzle is fetched live from the NYT Spelling Bee API.
+
+**Run:**
+```bash
+node SpellingBee/SpellingBee.js
+node SpellingBee/SpellingBee.js 2024-03-15
+```
+
+### How to Play
+Find as many words as you can using the provided letters. Every word must include the center letter (highlighted in yellow). Words must be at least 4 letters long and appear in the official word list.
+
+### Features
+- **Live daily puzzle** — fetched from the NYT Spelling Bee API
+- **Date argument** — pass a date (`YYYY-MM-DD`) to replay any past puzzle
+- **Word validation** — words must contain center letter and be in the valid word list
+- **Score tracking** — displays total words found
+
+---
+
+## Mini Crossword
+
+A small crossword puzzle from the New York Times. Each day's puzzle is fetched live from the NYT Crosswords API.
+
+**Run:**
+```bash
+node Mini/Mini.js
+node Mini/Mini.js 2024-03-15
+```
+
+### How to Play
+Fill in the crossword grid by entering answers to clues. Each clue is labeled with a number and direction (Across or Down).
+
+### Features
+- **Live daily puzzle** — fetched from the NYT Mini Crosswords API
+- **Date argument** — pass a date (`YYYY-MM-DD`) to play any historical puzzle
+- **Answer validation** — checks if your answer matches the solution
+- **Progress tracking** — shows how many clues you've completed
+
+---
+
+## MIDI Crossword
+
+A mid-sized crossword puzzle from the New York Times. Similar to the Mini but with a larger grid.
+
+**Run:**
+```bash
+node Midi/Midi.js
+node Midi/Midi.js 2024-03-15
+```
+
+### How to Play
+Fill in the crossword grid by entering answers to clues. Enter the clue number and your answer at the prompt.
+
+### Features
+- **Live daily puzzle** — fetched from the NYT MIDI Crosswords API
+- **Date argument** — pass a date (`YYYY-MM-DD`) to play any historical puzzle
+- **Answer validation** — verifies correct answers
+- **Progress tracking** — shows completion status
+
+---
+
+## Pips
+
+A pattern-matching puzzle from the New York Times. Each day a new puzzle is fetched live from the NYT Pips API.
+
+**Run:**
+```bash
+node Pips/Pips.js
+node Pips/Pips.js 2024-03-15
+```
+
+### How to Play
+Match visual patterns to images. The game presents patterns and images that must be correctly paired.
+
+### Features
+- **Live daily puzzle** — fetched from the NYT Pips API
+- **Date argument** — pass a date (`YYYY-MM-DD`) to replay any past puzzle
+- **Pattern matching** — visual pattern recognition puzzle
+
+---
+
 ## Web Version
-A web-based version of both games is available at [28pins.github.io](https://28pins.github.io), built with the same data and logic as the CLI versions. The web version uses code in the 'CLIGames-web' directory.
+A web-based version of all games is available at [28pins.github.io](https://28pins.github.io), built with the same data and logic as the CLI versions. The web version uses code in the 'CLIGames-web' directory.
+
 ---
 
 ## Scripts (data utilities)
 
-> **Note:** These scripts are developer utilities for pre-populating offline word/puzzle data for the `OpenWord-web` project. They are **not required** to play either game — both games fetch data automatically.
+> **Note:** These scripts are developer utilities for pre-populating offline puzzle data for the `CLIGames-web` project. They are **not required** to play any game — all games fetch data automatically.
 
 Requires **Node 18+** (uses global `fetch`).
 
 ### `scripts/populate_dailyWords.js`
-Fetches every daily Wordle solution from the NYT Wordle API starting from Wordle's launch date (2021-06-19) up to a given end date, and writes the full list to `OpenWord-web/generated_dailyWords.json`.
+Fetches puzzle data from the NYT APIs for all games (Wordle, Connections, Spelling Bee, Mini, MIDI, and Pips) and writes them to data files used by both CLI and web versions. This is useful for pre-populating data for offline use or building archives.
 
 ```bash
 node scripts/populate_dailyWords.js 2026-04-14
 ```
+
+This will fetch data from each game's API from its launch date up to the specified end date.
 
 ### `scripts/initCommands.sh`
 Runs `chmod +x` on all game scripts to make them directly executable from the terminal without `node` prefix. Only needs to be run once after cloning the repo.
