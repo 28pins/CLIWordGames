@@ -7,7 +7,7 @@
     "wrdli": "./Wrdli.js"
   },
   "scripts": {
-    "start": "node wrdli.js"
+    "start": "node Wrdli.js"
   },
   "keywords": [
     "cli",
