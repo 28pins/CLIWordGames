@@ -1,0 +1,24 @@
+{
+  "name": "pips",
+  "version": "1.0.0",
+  "description": "A colorful Pips CLI game",
+  "main": "Pips.js",
+  "bin": {
+    "pips": "./Pips.js"
+  },
+  "scripts": {
+    "start": "node Pips.js"
+  },
+  "keywords": [
+    "cli",
+    "pips",
+    "pattern-game",
+    "terminal"
+  ],
+  "author": "28Pins",
+  "license": "Custom No AI MIT Derivative",
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "inquirer": "^8.2.7"
+  }
+}

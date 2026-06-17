@@ -1,0 +1,24 @@
+{
+  "name": "spelling-bee",
+  "version": "1.0.0",
+  "description": "A colorful Spelling Bee-style CLI game",
+  "main": "SpellingBee.js",
+  "bin": {
+    "spelling-bee": "./SpellingBee.js"
+  },
+  "scripts": {
+    "start": "node SpellingBee.js"
+  },
+  "keywords": [
+    "cli",
+    "spelling-bee",
+    "word-game",
+    "terminal"
+  ],
+  "author": "28Pins",
+  "license": "Custom No AI MIT Derivative",
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "inquirer": "^8.2.7"
+  }
+}
